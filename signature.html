@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>모바일 지원 서명 테스트</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        margin-top: 20px;
+      }
+      canvas {
+        border: 1px solid #000;
+        cursor: crosshair;
+        touch-action: none; /* 터치 스크롤 방지 */
+      }
+      #controls {
+        margin-top: 10px;
+      }
+      button {
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>서명 테스트 (모바일 지원)</h1>
+    <canvas id="signatureCanvas" width="600" height="300"></canvas>
+    <div id="controls">
+      <button id="clearButton">지우기</button>
+      <button id="saveButton">저장</button>
+    </div>
+    <script>
+      const canvas = document.getElementById("signatureCanvas");
+      const ctx = canvas.getContext("2d");
+      const clearButton = document.getElementById("clearButton");
+      const saveButton = document.getElementById("saveButton");
+      let isDrawing = false;
+
+      // 마우스 이벤트
+      canvas.addEventListener("mousedown", (e) => {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+      });
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (isDrawing) {
+          ctx.lineTo(e.offsetX, e.offsetY);
+          ctx.stroke();
+        }
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        isDrawing = false;
+        ctx.closePath();
+      });
+
+      canvas.addEventListener("mouseleave", () => {
+        isDrawing = false;
+      });
+
+      // 터치 이벤트
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      });
+
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (isDrawing) {
+          const touch = e.touches[0];
+          const rect = canvas.getBoundingClientRect();
+          ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+          ctx.stroke();
+        }
+      });
+
+      canvas.addEventListener("touchend", () => {
+        isDrawing = false;
+        ctx.closePath();
+      });
+
+      // 지우기 버튼
+      clearButton.addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      // 저장 버튼
+      saveButton.addEventListener("click", () => {
+        const dataURL = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = dataURL;
+        link.download = "signature.png";
+        link.click();
+      });
+    </script>
+  </body>
+</html>
